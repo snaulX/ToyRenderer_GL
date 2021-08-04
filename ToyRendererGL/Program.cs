@@ -60,6 +60,7 @@ namespace ToyRendererGL
             Pipeline.Dispose();
             Texture.Dispose();
             Gl.Dispose();
+            Input.Dispose();
         }
 
         private static unsafe void OnRender(double deltaTime)
