@@ -9,8 +9,9 @@ namespace ToyRendererGL
     static class Program
     {
         private const string VertexShaderPath = "shader.vert";
-        private const string FragShaderPath = "shader.frag";
-        private const string TexturePath = "snaulx.jpg";
+        private const string FragLampPipelinePath = "shader.frag";
+        private const string FragLightShaderPath = "light.frag";
+        private const string DiffuseTexturePath = "snaulx.jpg";
         private const PrimitiveType Primitive = PrimitiveType.Triangles;
 
         private static IWindow Window;
@@ -20,19 +21,57 @@ namespace ToyRendererGL
         private static Buffer<float> VertexBuffer;
         private static Buffer<uint> IndexBuffer;
         private static VertexArray<float, uint> VertexArray;
-        private static Pipeline Pipeline;
-        private static Texture Texture;
+        private static Pipeline LampPipeline;
+        private static Pipeline LightPipeline;
+        private static Texture DiffuseTexture;
 
         private static Camera Camera;
-        private readonly static Transform[] Transforms = new Transform[4];
+        private readonly static Vector3 LampPosition = new Vector3(1.2f, 1.0f, 2.0f);
 
         private static readonly float[] Vertices =
         {
-            //X    Y      Z     U   V
-             0.5f,  0.5f, 0.0f, 1f, 1f,
-             0.5f, -0.5f, 0.0f, 1f, 0f,
-            -0.5f, -0.5f, 0.0f, 0f, 0f,
-            -0.5f,  0.5f, 0.5f, 0f, 1f
+            //X    Y      Z       Normals             U     V
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f
         };
 
         private static readonly uint[] Indices =
@@ -59,26 +98,56 @@ namespace ToyRendererGL
             VertexBuffer.Dispose();
             IndexBuffer.Dispose();
             VertexArray.Dispose();
-            Pipeline.Dispose();
-            Texture.Dispose();
+            LampPipeline.Dispose();
+            DiffuseTexture.Dispose();
             Gl.Dispose();
             Input.Dispose();
         }
 
         private static unsafe void OnRender(double deltaTime)
         {
-            Gl.Clear(ClearBufferMask.ColorBufferBit);
+            Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             VertexArray.Bind();
-            Texture.Bind();
-            Pipeline.Use();
-            Pipeline.SetUniform("uTexture0", 0);
+            LightPipeline.Use();
 
-            for (int i = 0; i < Transforms.Length; i++)
-            {
-                Pipeline.SetUniform("uModel", Transforms[i].ViewMatrix);
-                Gl.DrawElements(Primitive, (uint)Indices.Length, DrawElementsType.UnsignedInt, null);
-            }
+            DiffuseTexture.Bind(TextureUnit.Texture0);
+
+            //Setup the coordinate systems for our view
+            LightPipeline.SetUniform("uModel", Matrix4x4.Identity);
+            LightPipeline.SetUniform("uView", Camera.ViewMatrix);
+            LightPipeline.SetUniform("uProjection", Camera.PerspectiveMatrix);
+            //Let the shaders know where the Camera is looking from
+            LightPipeline.SetUniform("viewPos", Camera.Position);
+            //Configure the materials variables.
+            //Diffuse is set to 0 because our diffuseMap is bound to Texture0
+            LightPipeline.SetUniform("material.diffuse", 0);
+            //Specular is set to 1 because our diffuseMap is bound to Texture1
+            //LightPipeline.SetUniform("material.specular", 1);
+            LightPipeline.SetUniform("material.shininess", 32.0f);
+
+            var diffuseColor = new Vector3(0.5f);
+            var ambientColor = diffuseColor * new Vector3(0.2f);
+
+            LightPipeline.SetUniform("light.ambient", ambientColor);
+            LightPipeline.SetUniform("light.diffuse", diffuseColor); // darkened
+            LightPipeline.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+            LightPipeline.SetUniform("light.position", LampPosition);
+
+            Gl.DrawArrays(Primitive, 0, 36);
+
+            LampPipeline.Use();
+
+            //The Lamp cube is going to be a scaled down version of the normal cubes verticies moved to a different screen location
+            var lampMatrix = Matrix4x4.Identity;
+            lampMatrix *= Matrix4x4.CreateScale(0.2f);
+            lampMatrix *= Matrix4x4.CreateTranslation(LampPosition);
+
+            LampPipeline.SetUniform("uModel", lampMatrix);
+            LampPipeline.SetUniform("uView", Camera.ViewMatrix);
+            LampPipeline.SetUniform("uProjection", Camera.PerspectiveMatrix);
+
+            Gl.DrawArrays(Primitive, 0, 36);
         }
 
         private static void OnLoad()
@@ -88,36 +157,26 @@ namespace ToyRendererGL
 
             Gl = GL.GetApi(Window);
 
+            Gl.Enable(EnableCap.DepthTest);
+            Gl.DepthMask(Boolean.False);
+            Gl.DepthFunc(DepthFunction.Less);
+
             VertexBuffer = new Buffer<float>(Gl, Vertices, BufferTargetARB.ArrayBuffer);
             IndexBuffer = new Buffer<uint>(Gl, Indices, BufferTargetARB.ElementArrayBuffer);
             VertexArray = new VertexArray<float, uint>(Gl, VertexBuffer, IndexBuffer, 5);
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // position
+            VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // normals
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 2); // uv
-            Pipeline = new Pipeline(Gl, File.ReadAllText(VertexShaderPath), File.ReadAllText(FragShaderPath));
-            Texture = new Texture(Gl, TexturePath);
+            string vertexCode = File.ReadAllText(VertexShaderPath);
+            LampPipeline = new Pipeline(Gl, vertexCode, File.ReadAllText(FragLampPipelinePath));
+            LightPipeline = new Pipeline(Gl, vertexCode, File.ReadAllText(FragLightShaderPath));
+            DiffuseTexture = new Texture(Gl, DiffuseTexturePath);
 
             Camera = new Camera(Window.Size.X, Window.Size.Y);
             Window.Resize += (size) => Camera.OnResized(size.X, size.Y);
-
-            // Set transformations
-            Transforms[0] = new Transform
-            {
-                Position = new Vector3(0.5f, 0.5f, 0f)
-            };
-            Transforms[1] = new Transform
-            {
-                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f)
-            };
-            Transforms[2] = new Transform
-            {
-                Scale = 0.5f
-            };
-            Transforms[3] = new Transform
-            {
-                Position = new Vector3(-0.5f, 0.5f, 0f),
-                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f),
-                Scale = 0.5f
-            };
+            Camera.Position = new Vector3(0, 0, -6);
+            Camera.UpdateViewMatrix();
+            Camera.UpdatePerspectiveMatrix();
         }
 
         private static void KeyDown(IKeyboard keyboard, Key key, int arg3)
