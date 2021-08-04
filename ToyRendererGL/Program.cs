@@ -11,6 +11,7 @@ namespace ToyRendererGL
         private const string VertexShaderPath = "shader.vert";
         private const string FragShaderPath = "shader.frag";
         private const string TexturePath = "snaulx.jpg";
+        private const PrimitiveType Primitive = PrimitiveType.Triangles;
 
         private static IWindow Window;
         private static GL Gl;
@@ -22,6 +23,7 @@ namespace ToyRendererGL
         private static Pipeline Pipeline;
         private static Texture Texture;
 
+        private static Camera Camera;
         private readonly static Transform[] Transforms = new Transform[4];
 
         private static readonly float[] Vertices =
@@ -75,7 +77,7 @@ namespace ToyRendererGL
             for (int i = 0; i < Transforms.Length; i++)
             {
                 Pipeline.SetUniform("uModel", Transforms[i].ViewMatrix);
-                Gl.DrawElements(PrimitiveType.Triangles, (uint)Indices.Length, DrawElementsType.UnsignedInt, null);
+                Gl.DrawElements(Primitive, (uint)Indices.Length, DrawElementsType.UnsignedInt, null);
             }
         }
 
@@ -94,21 +96,28 @@ namespace ToyRendererGL
             Pipeline = new Pipeline(Gl, File.ReadAllText(VertexShaderPath), File.ReadAllText(FragShaderPath));
             Texture = new Texture(Gl, TexturePath);
 
+            Camera = new Camera(Window.Size.X, Window.Size.Y);
+            Window.Resize += (size) => Camera.OnResized(size.X, size.Y);
+
             // Set transformations
-            //Translation.
-            Transforms[0] = new Transform();
-            Transforms[0].Position = new Vector3(0.5f, 0.5f, 0f);
-            //Rotation.
-            Transforms[1] = new Transform();
-            Transforms[1].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f);
-            //Scaling.
-            Transforms[2] = new Transform();
-            Transforms[2].Scale = 0.5f;
-            //Mixed transformation.
-            Transforms[3] = new Transform();
-            Transforms[3].Position = new Vector3(-0.5f, 0.5f, 0f);
-            Transforms[3].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f);
-            Transforms[3].Scale = 0.5f;
+            Transforms[0] = new Transform
+            {
+                Position = new Vector3(0.5f, 0.5f, 0f)
+            };
+            Transforms[1] = new Transform
+            {
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f)
+            };
+            Transforms[2] = new Transform
+            {
+                Scale = 0.5f
+            };
+            Transforms[3] = new Transform
+            {
+                Position = new Vector3(-0.5f, 0.5f, 0f),
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f),
+                Scale = 0.5f
+            };
         }
 
         private static void KeyDown(IKeyboard keyboard, Key key, int arg3)
