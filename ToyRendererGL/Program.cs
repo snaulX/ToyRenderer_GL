@@ -1,11 +1,8 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using System.IO;
 using Silk.NET.OpenGL;
-using Silk.NET.Input;
 using Silk.NET.Windowing;
-using System.Drawing;
-using Silk.NET.Maths;
+using Silk.NET.Input;
 
 namespace ToyRendererGL
 {
@@ -15,8 +12,9 @@ namespace ToyRendererGL
         private const string FragShaderPath = "shader.frag";
         private const string TexturePath = "snaulx.jpg";
 
-        private static IWindow window;
+        private static IWindow Window;
         private static GL Gl;
+        private static Input Input;
 
         private static Buffer<float> VertexBuffer;
         private static Buffer<uint> IndexBuffer;
@@ -43,18 +41,15 @@ namespace ToyRendererGL
 
         static void Main(string[] args)
         {
-            WindowOptions wo = new WindowOptions()
-            {
-                Size = new Vector2D<int>(800, 600),
-                Title = "ToyRenderer by snaulX"
-            };
-            window = Window.Create(wo);
+            WindowOptions options = WindowOptions.Default;
+            options.Title = "ToyRenderer by snaulX";
+            Window = Silk.NET.Windowing.Window.Create(options);
 
-            window.Load += OnLoad;
-            window.Render += OnRender;
-            window.Closing += OnClosing;
+            Window.Load += OnLoad;
+            Window.Render += OnRender;
+            Window.Closing += OnClosing;
 
-            window.Run();
+            Window.Run();
         }
 
         private static void OnClosing()
@@ -85,7 +80,10 @@ namespace ToyRendererGL
 
         private static void OnLoad()
         {
-            Gl = GL.GetApi(window);
+            Input = new Input(Window);
+            Input.OnKeyDown += KeyDown;
+
+            Gl = GL.GetApi(Window);
 
             VertexBuffer = new Buffer<float>(Gl, Vertices, BufferTargetARB.ArrayBuffer);
             IndexBuffer = new Buffer<uint>(Gl, Indices, BufferTargetARB.ElementArrayBuffer);
@@ -110,6 +108,12 @@ namespace ToyRendererGL
             Transforms[3].Position = new Vector3(-0.5f, 0.5f, 0f);
             Transforms[3].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f);
             Transforms[3].Scale = 0.5f;
+        }
+
+        private static void KeyDown(IKeyboard keyboard, Key key, int arg3)
+        {
+            if (key == Key.Escape)
+                Window.Close();
         }
     }
 }
