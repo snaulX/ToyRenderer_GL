@@ -52,7 +52,8 @@ namespace ToyRendererGL
 
         #region Unifroms
         public void SetUniform(string name, float value) => gl.Uniform1(GetLocation(name), value);
-
+        public void SetUniform(string name, int value) => gl.Uniform1(GetLocation(name), value);
+        public void SetUniform(string name, double value) => gl.Uniform1(GetLocation(name), value);
         public unsafe void SetUniform(string name, Matrix4x4 matrix)
             => gl.UniformMatrix4(GetLocation(name), 1, false, (float*)&matrix);
         #endregion

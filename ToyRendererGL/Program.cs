@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using System.IO;
 using Silk.NET.OpenGL;
 using Silk.NET.Input;
@@ -19,6 +20,7 @@ namespace ToyRendererGL
         private static Buffer<uint> IndexBuffer;
         private static VertexArray<float, uint> VertexArray;
         private static Pipeline Pipeline;
+        private static Transform[] Transforms = new Transform[4];
 
         private static readonly float[] Vertices =
         {
@@ -52,9 +54,19 @@ namespace ToyRendererGL
             Gl.Dispose();
         }
 
-        private static void OnRender(double obj)
+        private static unsafe void OnRender(double deltaTime)
         {
-            throw new NotImplementedException();
+            Gl.Clear(ClearBufferMask.ColorBufferBit);
+
+            VertexArray.Bind();
+            Pipeline.Use();
+            Pipeline.SetUniform("uTexture0", 0);
+
+            for (int i = 0; i < Transforms.Length; i++)
+            {
+                Pipeline.SetUniform("uModel", Transforms[i].ViewMatrix);
+                Gl.DrawElements(PrimitiveType.Triangles, (uint)Indices.Length, DrawElementsType.UnsignedInt, null);
+            }
         }
 
         private static void OnLoad()
@@ -67,6 +79,22 @@ namespace ToyRendererGL
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // position
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 2); // uv
             Pipeline = new Pipeline(Gl, File.ReadAllText(VertexShaderPath), File.ReadAllText(FragShaderPath));
+
+            // Set transformations
+            //Translation.
+            Transforms[0] = new Transform();
+            Transforms[0].Position = new Vector3(0.5f, 0.5f, 0f);
+            //Rotation.
+            Transforms[1] = new Transform();
+            Transforms[1].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f);
+            //Scaling.
+            Transforms[2] = new Transform();
+            Transforms[2].Scale = 0.5f;
+            //Mixed transformation.
+            Transforms[3] = new Transform();
+            Transforms[3].Position = new Vector3(-0.5f, 0.5f, 0f);
+            Transforms[3].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 1f);
+            Transforms[3].Scale = 0.5f;
         }
     }
 }
