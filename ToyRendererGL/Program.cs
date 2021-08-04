@@ -14,6 +14,7 @@ namespace ToyRendererGL
 
         private static Buffer<float> VertexBuffer;
         private static Buffer<uint> IndexBuffer;
+        private static VertexArray<float, uint> VertexArray;
 
         private static readonly float[] Vertices =
         {
@@ -40,7 +41,10 @@ namespace ToyRendererGL
 
         private static void OnClosing()
         {
-            throw new NotImplementedException();
+            VertexBuffer.Dispose();
+            IndexBuffer.Dispose();
+            VertexArray.Dispose();
+            Gl.Dispose();
         }
 
         private static void OnRender(double obj)
@@ -54,6 +58,9 @@ namespace ToyRendererGL
 
             VertexBuffer = new Buffer<float>(Gl, Vertices, BufferTargetARB.ArrayBuffer);
             IndexBuffer = new Buffer<uint>(Gl, Indices, BufferTargetARB.ElementArrayBuffer);
+            VertexArray = new VertexArray<float, uint>(Gl, VertexBuffer, IndexBuffer, 5);
+            VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // position
+            VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 2); // uv
         }
     }
 }
