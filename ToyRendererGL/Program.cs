@@ -13,6 +13,8 @@ namespace ToyRendererGL
     {
         private const string VertexShaderPath = "shader.vert";
         private const string FragShaderPath = "shader.frag";
+        private const string TexturePath = "snaulx.jpg";
+
         private static IWindow window;
         private static GL Gl;
 
@@ -20,7 +22,9 @@ namespace ToyRendererGL
         private static Buffer<uint> IndexBuffer;
         private static VertexArray<float, uint> VertexArray;
         private static Pipeline Pipeline;
-        private static Transform[] Transforms = new Transform[4];
+        private static Texture Texture;
+
+        private readonly static Transform[] Transforms = new Transform[4];
 
         private static readonly float[] Vertices =
         {
@@ -39,10 +43,18 @@ namespace ToyRendererGL
 
         static void Main(string[] args)
         {
-            window = Window.Create(WindowOptions.Default);
+            WindowOptions wo = new WindowOptions()
+            {
+                Size = new Vector2D<int>(800, 600),
+                Title = "ToyRenderer by snaulX"
+            };
+            window = Window.Create(wo);
+
             window.Load += OnLoad;
             window.Render += OnRender;
             window.Closing += OnClosing;
+
+            window.Run();
         }
 
         private static void OnClosing()
@@ -51,6 +63,7 @@ namespace ToyRendererGL
             IndexBuffer.Dispose();
             VertexArray.Dispose();
             Pipeline.Dispose();
+            Texture.Dispose();
             Gl.Dispose();
         }
 
@@ -59,6 +72,7 @@ namespace ToyRendererGL
             Gl.Clear(ClearBufferMask.ColorBufferBit);
 
             VertexArray.Bind();
+            Texture.Bind();
             Pipeline.Use();
             Pipeline.SetUniform("uTexture0", 0);
 
@@ -79,6 +93,7 @@ namespace ToyRendererGL
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // position
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 2); // uv
             Pipeline = new Pipeline(Gl, File.ReadAllText(VertexShaderPath), File.ReadAllText(FragShaderPath));
+            Texture = new Texture(Gl, TexturePath);
 
             // Set transformations
             //Translation.
