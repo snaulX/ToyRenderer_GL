@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using Silk.NET.OpenGL;
 
 namespace ToyRendererGL
 {
@@ -7,11 +6,15 @@ namespace ToyRendererGL
     {
         public Vector3 Position { get; set; } = Vector3.Zero;
         public Vector3 Up { get; set; } = Vector3.UnitY;
-        public Vector3 LookDirection => Vector3.Transform(-Vector3.UnitZ, Rotation);
+        public Vector3 LookDirection 
+        { 
+            get => Vector3.Transform(Vector3.UnitZ, Rotation);
+            set => LookAt(value);
+        }
         public Quaternion Rotation { get; set; } = Quaternion.Identity;
         public float FieldOfView { get; set; } = 1f;
-        public float Near { get; set; } = 1f;
-        public float Far { get; set; } = 4000f;
+        public float Near { get; set; } = 0.1f;
+        public float Far { get; set; } = 100f;
         public float AspectRatio { get; set; }
         public Matrix4x4 ViewMatrix { get; private set; }
         public Matrix4x4 PerspectiveMatrix { get; private set; }
@@ -24,6 +27,12 @@ namespace ToyRendererGL
         public void OnResized(int width, int height)
         {
             AspectRatio = width / height;
+        }
+
+        public void LookAt(Vector3 target)
+        {
+            ViewMatrix = Matrix4x4.CreateLookAt(Position, target, Up);
+            Rotation = Quaternion.CreateFromRotationMatrix(ViewMatrix);
         }
 
         public void UpdateViewMatrix()

@@ -1,4 +1,7 @@
-﻿using System.Numerics;
+﻿#if DEBUG
+using System;
+#endif
+using System.Numerics;
 using System.IO;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -9,7 +12,7 @@ namespace ToyRendererGL
     static class Program
     {
         private const string VertexShaderPath = "shader.vert";
-        private const string FragLampPipelinePath = "shader.frag";
+        private const string FragShaderPath = "shader.frag";
         private const string FragLightShaderPath = "light.frag";
         private const string DiffuseTexturePath = "snaulx.jpg";
         private const PrimitiveType Primitive = PrimitiveType.Triangles;
@@ -118,20 +121,20 @@ namespace ToyRendererGL
             LightPipeline.SetUniform("uView", Camera.ViewMatrix);
             LightPipeline.SetUniform("uProjection", Camera.PerspectiveMatrix);
             //Let the shaders know where the Camera is looking from
-            LightPipeline.SetUniform("viewPos", Camera.Position);
+            //LightPipeline.SetUniform("cameraPos", Camera.Position);
             //Configure the materials variables.
             //Diffuse is set to 0 because our diffuseMap is bound to Texture0
             LightPipeline.SetUniform("material.diffuse", 0);
             //Specular is set to 1 because our diffuseMap is bound to Texture1
             //LightPipeline.SetUniform("material.specular", 1);
-            LightPipeline.SetUniform("material.shininess", 32.0f);
+            //LightPipeline.SetUniform("material.shininess", 32.0f);
 
             var diffuseColor = new Vector3(0.5f);
             var ambientColor = diffuseColor * new Vector3(0.2f);
 
             LightPipeline.SetUniform("light.ambient", ambientColor);
             LightPipeline.SetUniform("light.diffuse", diffuseColor); // darkened
-            LightPipeline.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+            //LightPipeline.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
             LightPipeline.SetUniform("light.position", LampPosition);
 
             Gl.DrawArrays(Primitive, 0, 36);
@@ -158,7 +161,7 @@ namespace ToyRendererGL
             Gl = GL.GetApi(Window);
 
             Gl.Enable(EnableCap.DepthTest);
-            Gl.DepthMask(Boolean.False);
+            Gl.DepthMask(false);
             Gl.DepthFunc(DepthFunction.Less);
 
             VertexBuffer = new Buffer<float>(Gl, Vertices, BufferTargetARB.ArrayBuffer);
@@ -168,21 +171,40 @@ namespace ToyRendererGL
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // normals
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 2); // uv
             string vertexCode = File.ReadAllText(VertexShaderPath);
-            LampPipeline = new Pipeline(Gl, vertexCode, File.ReadAllText(FragLampPipelinePath));
+            LampPipeline = new Pipeline(Gl, vertexCode, File.ReadAllText(FragShaderPath));
             LightPipeline = new Pipeline(Gl, vertexCode, File.ReadAllText(FragLightShaderPath));
             DiffuseTexture = new Texture(Gl, DiffuseTexturePath);
 
             Camera = new Camera(Window.Size.X, Window.Size.Y);
             Window.Resize += (size) => Camera.OnResized(size.X, size.Y);
-            Camera.Position = new Vector3(0, 0, -6);
-            Camera.UpdateViewMatrix();
+            Camera.Position = Vector3.UnitZ * 6;
+            Camera.LookAt(Vector3.UnitZ * -1);
+            //Camera.UpdateViewMatrix(); // ViewMatrix updates in LookAt method
             Camera.UpdatePerspectiveMatrix();
+
+#if DEBUG
+            Console.WriteLine(Camera.LookDirection);
+            Console.WriteLine(Camera.Position);
+            Console.WriteLine(LampPosition);
+#endif
         }
 
         private static void KeyDown(IKeyboard keyboard, Key key, int arg3)
         {
             if (key == Key.Escape)
                 Window.Close();
+            if (key == Key.W)
+            {
+                Camera.Position += Vector3.UnitZ;
+            }
+            else if (key == Key.S)
+            {
+                Camera.Position -= Vector3.UnitZ;
+            }
+#if DEBUG
+            Console.WriteLine(Camera.Position);
+#endif
+            Camera.UpdateViewMatrix();
         }
     }
 }

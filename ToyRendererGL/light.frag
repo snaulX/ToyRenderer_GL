@@ -6,19 +6,19 @@ in vec2 fTexCoords;
 struct Material {
     sampler2D diffuse;
     //sampler2D specular;
-    float shininess;
+    //float shininess;
 };
 
 struct Light {
     vec3 position;
     vec3 ambient;
     vec3 diffuse;
-    vec3 specular;
+    //vec3 specular;
 };
 
 uniform Material material;
 uniform Light light;
-uniform vec3 viewPos;
+//uniform vec3 cameraPos;
 
 out vec4 FragColor;
 
