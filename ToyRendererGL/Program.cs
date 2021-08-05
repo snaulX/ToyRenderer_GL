@@ -14,7 +14,8 @@ namespace ToyRendererGL
         private const string VertexShaderPath = "shader.vert";
         private const string FragShaderPath = "shader.frag";
         private const string FragLightShaderPath = "light.frag";
-        private const string DiffuseTexturePath = "snaulx.jpg";
+        private const string DiffuseTexturePath = "Brick_Wall_008_SD\\Brick_wall_008_COLOR.jpg";
+        private const string SpecularTexturePath = "Brick_Wall_008_SD\\Brick_wall_008_SPEC.jpg";
         private const PrimitiveType Primitive = PrimitiveType.Triangles;
 
         private static IWindow Window;
@@ -27,6 +28,7 @@ namespace ToyRendererGL
         private static Pipeline LampPipeline;
         private static Pipeline LightPipeline;
         private static Texture DiffuseTexture;
+        private static Texture SpecularTexture;
 
         private static Camera Camera;
         private readonly static Vector3 LampPosition = new Vector3(1.2f, 1.0f, 2.0f);
@@ -102,7 +104,9 @@ namespace ToyRendererGL
             IndexBuffer.Dispose();
             VertexArray.Dispose();
             LampPipeline.Dispose();
+            LightPipeline.Dispose();
             DiffuseTexture.Dispose();
+            SpecularTexture.Dispose();
             Gl.Dispose();
             Input.Dispose();
         }
@@ -115,26 +119,27 @@ namespace ToyRendererGL
             LightPipeline.Use();
 
             DiffuseTexture.Bind(TextureUnit.Texture0);
+            SpecularTexture.Bind(TextureUnit.Texture1);
 
             //Setup the coordinate systems for our view
             LightPipeline.SetUniform("uModel", Matrix4x4.Identity);
             LightPipeline.SetUniform("uView", Camera.ViewMatrix);
             LightPipeline.SetUniform("uProjection", Camera.PerspectiveMatrix);
             //Let the shaders know where the Camera is looking from
-            //LightPipeline.SetUniform("cameraPos", Camera.Position);
+            LightPipeline.SetUniform("viewPos", Camera.Position);
             //Configure the materials variables.
             //Diffuse is set to 0 because our diffuseMap is bound to Texture0
             LightPipeline.SetUniform("material.diffuse", 0);
             //Specular is set to 1 because our diffuseMap is bound to Texture1
-            //LightPipeline.SetUniform("material.specular", 1);
-            //LightPipeline.SetUniform("material.shininess", 32.0f);
+            LightPipeline.SetUniform("material.specular", 1);
+            LightPipeline.SetUniform("material.shininess", 32.0f);
 
             var diffuseColor = new Vector3(0.5f);
             var ambientColor = diffuseColor * new Vector3(0.2f);
 
             LightPipeline.SetUniform("light.ambient", ambientColor);
             LightPipeline.SetUniform("light.diffuse", diffuseColor); // darkened
-            //LightPipeline.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+            LightPipeline.SetUniform("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
             LightPipeline.SetUniform("light.position", LampPosition);
 
             Gl.DrawArrays(Primitive, 0, 36);
@@ -174,6 +179,7 @@ namespace ToyRendererGL
             LampPipeline = new Pipeline(Gl, vertexCode, File.ReadAllText(FragShaderPath));
             LightPipeline = new Pipeline(Gl, vertexCode, File.ReadAllText(FragLightShaderPath));
             DiffuseTexture = new Texture(Gl, DiffuseTexturePath);
+            SpecularTexture = new Texture(Gl, SpecularTexturePath);
 
             Camera = new Camera(Window.Size.X, Window.Size.Y);
             Window.Resize += (size) => Camera.OnResized(size.X, size.Y);
@@ -204,6 +210,7 @@ namespace ToyRendererGL
 #if DEBUG
             Console.WriteLine(Camera.Position);
 #endif
+
             Camera.UpdateViewMatrix();
         }
     }

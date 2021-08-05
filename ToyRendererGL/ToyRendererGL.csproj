@@ -19,6 +19,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Brick_Wall_008_SD\Brick_wall_008_COLOR.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Brick_Wall_008_SD\Brick_wall_008_DISP.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Brick_Wall_008_SD\Brick_wall_008_NORM.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Brick_Wall_008_SD\Brick_wall_008_OCC.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Brick_Wall_008_SD\Brick_wall_008_SPEC.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="light.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
