@@ -122,19 +122,19 @@ namespace ToyRendererGL
             DefaultPipeline.SetUniform("view", Camera.ViewMatrix);
             DefaultPipeline.SetUniform("projection", Camera.PerspectiveMatrix);
             {
-                //ObjectTransform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathF.PI / 180 * Angle);
+                ObjectTransform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathF.PI / 180 * Angle);
                 DefaultPipeline.SetUniform("model", ObjectTransform.ViewMatrix);
             }
 
-#if DEBUG
-            Vector4 pos = new Vector4(-0.5f, -0.5f, -0.5f, 1);
-            Console.WriteLine(Multiply(Camera.PerspectiveMatrix * Camera.ViewMatrix * ObjectTransform.ViewMatrix, pos));
-#endif
+//#if DEBUG
+//            Vector4 pos = new Vector4(-0.5f, -0.5f, -0.5f, 1);
+//            Console.WriteLine(Multiply(Camera.PerspectiveMatrix * Camera.ViewMatrix * ObjectTransform.ViewMatrix, pos));
+//#endif
 
             Gl.DrawArrays(Primitive, 0, 36);
         }
 
-        private static void OnLoad()
+        private static unsafe void OnLoad()
         {
             Input = new Input(Window);
             Input.OnKeyDown += KeyDown;
@@ -142,8 +142,12 @@ namespace ToyRendererGL
             Gl = GL.GetApi(Window);
 
             Gl.Enable(EnableCap.DepthTest);
-            Gl.DepthMask(false);
-            Gl.DepthFunc(DepthFunction.Less);
+#if DEBUG
+            Gl.Enable(EnableCap.DebugOutput);
+            Gl.DebugMessageCallback(DebugMessage, null);
+#endif
+            //Gl.DepthMask(false);
+            //Gl.DepthFunc(DepthFunction.Less);
 
             VertexBuffer = new Buffer<float>(Gl, Vertices, BufferTargetARB.ArrayBuffer);
             IndexBuffer = new Buffer<uint>(Gl, Indices, BufferTargetARB.ElementArrayBuffer);
@@ -167,16 +171,45 @@ namespace ToyRendererGL
         {
             if (key == Key.Escape)
                 Window.Close();
+
             if (key == Key.W)
-            {
-                Camera.Position += Vector3.UnitZ;
-            }
-            else if (key == Key.S)
             {
                 Camera.Position -= Vector3.UnitZ;
             }
+            else if (key == Key.S)
+            {
+                Camera.Position += Vector3.UnitZ;
+            }
+            else if (key == Key.A)
+            {
+                Camera.Position -= Vector3.UnitX;
+                Camera.LookTarget -= Vector3.UnitX;
+            }
+            else if (key == Key.D)
+            {
+                Camera.Position += Vector3.UnitX;
+                Camera.LookTarget += Vector3.UnitX;
+            }
+
+            if (key == Key.Up)
+            {
+                Camera.LookTarget += Vector3.UnitY;
+            }
+            else if (key == Key.Down)
+            {
+                Camera.LookTarget -= Vector3.UnitY;
+            }
+            else if (key == Key.Right)
+            {
+                Camera.LookTarget += Vector3.UnitX;
+            }
+            else if (key == Key.Left)
+            {
+                Camera.LookTarget -= Vector3.UnitX;
+            }
 #if DEBUG
             Console.WriteLine(Camera.Position);
+            Console.WriteLine(arg3);
 #endif
 
             Camera.UpdateViewMatrix();
@@ -212,5 +245,12 @@ namespace ToyRendererGL
             }
             return ret;
         }
+
+#if DEBUG
+        private static void DebugMessage(GLEnum source, GLEnum type, int id, GLEnum severity, int length, nint message, nint userParam)
+        {
+            Console.WriteLine($"{source} {type} {id} {severity} {length} {message} {userParam}");
+        }
+#endif
     }
 }
