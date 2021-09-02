@@ -6,12 +6,8 @@ namespace ToyRendererGL
     {
         public Vector3 Position { get; set; } = Vector3.Zero;
         public Vector3 Up { get; set; } = Vector3.UnitY;
-        public Vector3 LookDirection 
-        { 
-            get => Vector3.Transform(Vector3.UnitZ, Rotation);
-            set => LookAt(value);
-        }
-        public Quaternion Rotation { get; set; } = Quaternion.Identity;
+        public Vector3 LookTarget { get; set; } = Vector3.Zero;//-Vector3.UnitZ;
+        public Vector3 LookDirection => Vector3.Normalize(Vector3.Cross(Position, LookTarget));
         public float FieldOfView { get; set; } = 1f;
         public float Near { get; set; } = 0.1f;
         public float Far { get; set; } = 100f;
@@ -22,22 +18,19 @@ namespace ToyRendererGL
         public Camera(int width, int height)
         {
             OnResized(width, height);
+            UpdateViewMatrix();
+            UpdatePerspectiveMatrix();
         }
 
         public void OnResized(int width, int height)
         {
-            AspectRatio = width / height;
-        }
-
-        public void LookAt(Vector3 target)
-        {
-            ViewMatrix = Matrix4x4.CreateLookAt(Position, target, Up);
-            Rotation = Quaternion.CreateFromRotationMatrix(ViewMatrix);
+            if (width != 0 || height != 0)
+                AspectRatio = width / height;
         }
 
         public void UpdateViewMatrix()
         {
-            ViewMatrix = Matrix4x4.CreateLookAt(Position, Position + LookDirection, Up);
+            ViewMatrix = Matrix4x4.CreateLookAt(Position, LookTarget, Up);
         }
 
         public void UpdatePerspectiveMatrix()
