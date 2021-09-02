@@ -20,14 +20,14 @@ namespace ToyRendererGL
         public Func<Transform, double, Transform>[] Animations = Array.Empty<Func<Transform, double, Transform>>();
 
         private Pipeline pipeline;
-        private TexturedCube[] cubes;
+        private TexturedMesh<float, uint>[] meshes;
 
         private readonly string vertCode, fragCode;
 
-        public RenderTextured(GL gl, params TexturedCube[] cubes)
+        public RenderTextured(GL gl, params TexturedMesh<float, uint>[] meshes)
         {
             Gl = gl;
-            this.cubes = cubes;
+            this.meshes = meshes;
 
             vertCode = File.ReadAllText(VertexShaderPath);
             fragCode = File.ReadAllText(FragShaderPath);
@@ -43,7 +43,7 @@ namespace ToyRendererGL
             pipeline.Use();
             pipeline.SetUniform("projection", cam.PerspectiveMatrix);
             pipeline.SetUniform("view", cam.ViewMatrix);
-            foreach (var cube in cubes)
+            foreach (var cube in meshes)
             {
                 cube.VertexArray.Bind();
                 cube.DiffuseTexture.Bind(TextureUnit.Texture0);

@@ -11,23 +11,15 @@ namespace ToyRendererGL
 {
     static class Program
     {
-        private const string VertexShaderPath = "shader.vert";
-        private const string FragShaderPath = "shader.frag";
         private const string DiffuseTexturePath = "Brick_Wall_008_SD\\Brick_wall_008_COLOR.jpg";
         private const string SpecularTexturePath = "Brick_Wall_008_SD\\Brick_wall_008_SPEC.jpg";
-        private const PrimitiveType Primitive = PrimitiveType.Triangles;
-        private const float DegreesPerSecond = 180;
-        private const float MaxScale = 1.5f;
-        private const float MinScale = 1;
 
         private static IWindow Window;
         private static GL Gl;
         private static Input Input;
 
         private static RenderTextured RenderTask;
-        private static TexturedCube Cube;
         private static Camera Camera;
-        private static bool ScaleAnimationUp = true;
 
         static void Main(string[] args)
         {
@@ -70,19 +62,19 @@ namespace ToyRendererGL
             //Gl.DepthMask(false);
             //Gl.DepthFunc(DepthFunction.Less);
 
-            Cube = new TexturedCube(Gl, DiffuseTexturePath);
+            TexturedCube brickCube = new TexturedCube(Gl, DiffuseTexturePath);
             TexturedCube snaulXCube = new TexturedCube(Gl, "snaulx.jpg");
-            snaulXCube.Transform.Position = new Vector3(1, 2, 3);
-            RenderTask = new RenderTextured(Gl, Cube, snaulXCube)
+            snaulXCube.Transform.Position = new Vector3(1, 3, 1);
+            RenderTask = new RenderTextured(Gl, brickCube, snaulXCube)
             {
-                Animations = new Func<Transform, double, Transform>[] { ScaleAnimation, ScaleRotation }
+                Animations = new Func<Transform, double, Transform>[] { Animations.ScaleAnimation, Animations.ScaleRotation }
             };
             RenderTask.Init();
 
             Camera = new Camera(Window.Size.X, Window.Size.Y);
             Window.Resize += (size) => Camera.OnResized(size.X, size.Y);
             Camera.Position = new Vector3(0, 0, 3);
-            Camera.LookTarget = Cube.Transform.Position;
+            Camera.LookTarget = brickCube.Transform.Position;
             Camera.Up = Vector3.UnitY;
             Camera.UpdateViewMatrix();
             Camera.UpdatePerspectiveMatrix();
@@ -144,26 +136,6 @@ namespace ToyRendererGL
 #endif
 
             Camera.UpdateViewMatrix();
-        }
-
-        private static Transform ScaleAnimation(Transform transform, double deltaTime)
-        {
-            float scale = transform.Scale;
-            if (scale >= MaxScale)
-            {
-                ScaleAnimationUp = false;
-            }
-            else if (scale <= MinScale)
-            {
-                ScaleAnimationUp = true;
-            }
-            transform.Scale = (float)(scale + (ScaleAnimationUp ? deltaTime : -deltaTime));
-            return transform;
-        }
-        private static Transform ScaleRotation(Transform transform, double deltaTime)
-        {
-            transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, -((float)(DegreesPerSecond * deltaTime)).ToRadians());
-            return transform;
         }
 
 #if DEBUG

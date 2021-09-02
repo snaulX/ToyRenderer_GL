@@ -7,7 +7,7 @@ namespace ToyRendererGL
     {
         public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
 
-        public float Scale { get; set; } = 1f;
+        public Vector3 Scale { get; set; } = Vector3.One;
 
         public Quaternion Rotation { get; set; } = Quaternion.Identity;
 
