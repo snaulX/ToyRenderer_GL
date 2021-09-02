@@ -8,7 +8,7 @@ namespace ToyRendererGL
         public Vector3 Up { get; set; } = Vector3.UnitY;
         public Vector3 LookTarget { get; set; } = Vector3.Zero;//-Vector3.UnitZ;
         public Vector3 LookDirection => Vector3.Normalize(Vector3.Cross(Position, LookTarget));
-        public float FieldOfView { get; set; } = System.MathF.PI / 2;
+        public float FieldOfView { get; set; } = 90f.ToRadians();
         public float Near { get; set; } = 0.1f;
         public float Far { get; set; } = 100f;
         public float AspectRatio { get; set; }

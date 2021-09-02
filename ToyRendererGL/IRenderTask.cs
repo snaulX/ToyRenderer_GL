@@ -4,9 +4,10 @@ using System.Collections.Generic;
 
 namespace ToyRendererGL
 {
-    public interface IRenderable
+    public interface IRenderTask
     {
+        GL Gl { get; set; }
         void Init();
-        void Render(GL gl, Pipeline pipeline);
+        void Render(Camera cam, double deltaTime);
     }
 }
