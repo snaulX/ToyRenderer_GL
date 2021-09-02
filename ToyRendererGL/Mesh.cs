@@ -20,7 +20,7 @@ namespace ToyRendererGL
         public readonly Buffer<TVertex> VertexBuffer;
         public readonly Buffer<TIndex> IndexBuffer;
         public VertexArray<TVertex, TIndex> VertexArray;
-        public Transform Transform;
+        public Transform Transform = new Transform();
 
         public Mesh(GL gl)
         {

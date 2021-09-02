@@ -11,12 +11,13 @@ namespace ToyRendererGL
 {
     public class RenderTextured : IRenderTask
     {
+        private const PrimitiveType Primitive = PrimitiveType.Triangles;
         private const string VertexShaderPath = "shader.vert";
         private const string FragShaderPath = "shader.frag";
 
         public GL Gl { get; set; }
 
-        public event Func<Transform, double, Transform> Animations;
+        public Func<Transform, double, Transform>[] Animations = Array.Empty<Func<Transform, double, Transform>>();
 
         private Pipeline pipeline;
         private TexturedCube[] cubes;
@@ -46,9 +47,20 @@ namespace ToyRendererGL
             {
                 cube.VertexArray.Bind();
                 cube.DiffuseTexture.Bind(TextureUnit.Texture0);
-                Matrix4x4 model = (Animations?.Invoke(cube.Transform, deltaTime) ?? cube.Transform).ViewMatrix;
+                Matrix4x4 model = ExecuteAnimations(cube.Transform, deltaTime).ViewMatrix;
                 pipeline.SetUniform("model", model);
+                Gl.DrawArrays(Primitive, 0, (uint)(cube.Vertices.Length/cube.Size));
             }
+        }
+
+        public Transform ExecuteAnimations(Transform transform, double deltaTime)
+        {
+            Transform result = transform;
+            foreach (var anim in Animations)
+            {
+                result = anim.Invoke(result, deltaTime);
+            }
+            return result;
         }
     }
 }

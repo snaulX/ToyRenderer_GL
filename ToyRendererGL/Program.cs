@@ -24,68 +24,10 @@ namespace ToyRendererGL
         private static GL Gl;
         private static Input Input;
 
-        private static Buffer<float> VertexBuffer;
-        private static Buffer<uint> IndexBuffer;
-        private static VertexArray<float, uint> VertexArray;
-        private static Pipeline DefaultPipeline;
-        private static Texture DiffuseTexture;
-        private static Texture SpecularTexture;
-
+        private static RenderTextured RenderTask;
+        private static TexturedCube Cube;
         private static Camera Camera;
-        private static Transform ObjectTransform = new Transform();
-        private static bool ScaleAnimation = true;
-
-        private static readonly float[] Vertices =
-        {
-            //X    Y      Z       U     V
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-        };
-
-        private static readonly uint[] Indices =
-        {
-            0, 1, 3,
-            1, 2, 3
-        };
+        private static bool ScaleAnimationUp = true;
 
         static void Main(string[] args)
         {
@@ -102,12 +44,6 @@ namespace ToyRendererGL
 
         private static void OnClosing()
         {
-            VertexBuffer.Dispose();
-            IndexBuffer.Dispose();
-            VertexArray.Dispose();
-            DefaultPipeline.Dispose();
-            DiffuseTexture.Dispose();
-            SpecularTexture.Dispose();
             Gl.Dispose();
             Input.Dispose();
         }
@@ -116,35 +52,7 @@ namespace ToyRendererGL
         {
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            VertexArray.Bind();
-
-            DiffuseTexture.Bind(TextureUnit.Texture0);
-
-            DefaultPipeline.Use();
-
-            DefaultPipeline.SetUniform("view", Camera.ViewMatrix);
-            DefaultPipeline.SetUniform("projection", Camera.PerspectiveMatrix);
-            {
-                ObjectTransform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, -((float)(DegreesPerSecond * deltaTime)).ToRadians());
-                float scale = ObjectTransform.Scale;
-                if (scale >= MaxScale)
-                {
-                    ScaleAnimation = false;
-                }
-                else if (scale <= MinScale)
-                {
-                    ScaleAnimation = true;
-                }
-                ObjectTransform.Scale = (float)(scale + (ScaleAnimation ? deltaTime : -deltaTime));
-                DefaultPipeline.SetUniform("model", ObjectTransform.ViewMatrix);
-            }
-
-//#if DEBUG
-//            Vector4 pos = new Vector4(-0.5f, -0.5f, -0.5f, 1);
-//            Console.WriteLine(ExtendedMath.Multiply(Camera.PerspectiveMatrix * Camera.ViewMatrix * ObjectTransform.ViewMatrix, pos));
-//#endif
-
-            Gl.DrawArrays(Primitive, 0, 36);
+            RenderTask.Render(Camera, deltaTime);
         }
 
         private static unsafe void OnLoad()
@@ -162,19 +70,19 @@ namespace ToyRendererGL
             //Gl.DepthMask(false);
             //Gl.DepthFunc(DepthFunction.Less);
 
-            VertexBuffer = new Buffer<float>(Gl, Vertices, BufferTargetARB.ArrayBuffer);
-            IndexBuffer = new Buffer<uint>(Gl, Indices, BufferTargetARB.ElementArrayBuffer);
-            VertexArray = new VertexArray<float, uint>(Gl, VertexBuffer, IndexBuffer, 5);
-            VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // position
-            VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 2); // uv
-            DefaultPipeline = new Pipeline(Gl, File.ReadAllText(VertexShaderPath), File.ReadAllText(FragShaderPath));
-            DiffuseTexture = new Texture(Gl, DiffuseTexturePath);
-            SpecularTexture = new Texture(Gl, SpecularTexturePath);
+            Cube = new TexturedCube(Gl, DiffuseTexturePath);
+            TexturedCube snaulXCube = new TexturedCube(Gl, "snaulx.jpg");
+            snaulXCube.Transform.Position = new Vector3(1, 2, 3);
+            RenderTask = new RenderTextured(Gl, Cube, snaulXCube)
+            {
+                Animations = new Func<Transform, double, Transform>[] { ScaleAnimation, ScaleRotation }
+            };
+            RenderTask.Init();
 
             Camera = new Camera(Window.Size.X, Window.Size.Y);
             Window.Resize += (size) => Camera.OnResized(size.X, size.Y);
             Camera.Position = new Vector3(0, 0, 3);
-            Camera.LookTarget = ObjectTransform.Position;
+            Camera.LookTarget = Cube.Transform.Position;
             Camera.Up = Vector3.UnitY;
             Camera.UpdateViewMatrix();
             Camera.UpdatePerspectiveMatrix();
@@ -236,6 +144,26 @@ namespace ToyRendererGL
 #endif
 
             Camera.UpdateViewMatrix();
+        }
+
+        private static Transform ScaleAnimation(Transform transform, double deltaTime)
+        {
+            float scale = transform.Scale;
+            if (scale >= MaxScale)
+            {
+                ScaleAnimationUp = false;
+            }
+            else if (scale <= MinScale)
+            {
+                ScaleAnimationUp = true;
+            }
+            transform.Scale = (float)(scale + (ScaleAnimationUp ? deltaTime : -deltaTime));
+            return transform;
+        }
+        private static Transform ScaleRotation(Transform transform, double deltaTime)
+        {
+            transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, -((float)(DegreesPerSecond * deltaTime)).ToRadians());
+            return transform;
         }
 
 #if DEBUG
