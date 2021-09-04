@@ -17,8 +17,6 @@ namespace ToyRendererGL
 
         public GL Gl { get; set; }
 
-        public Func<Transform, double, Transform>[] Animations = Array.Empty<Func<Transform, double, Transform>>();
-
         private Pipeline pipeline;
         private TexturedMesh<float, uint>[] meshes;
 
@@ -43,24 +41,15 @@ namespace ToyRendererGL
             pipeline.Use();
             pipeline.SetUniform("projection", cam.PerspectiveMatrix);
             pipeline.SetUniform("view", cam.ViewMatrix);
-            foreach (var cube in meshes)
+            foreach (var mesh in meshes)
             {
-                cube.VertexArray.Bind();
-                cube.DiffuseTexture.Bind(TextureUnit.Texture0);
-                Matrix4x4 model = ExecuteAnimations(cube.Transform, deltaTime).ViewMatrix;
+                mesh.VertexArray.Bind();
+                mesh.DiffuseTexture.Bind(TextureUnit.Texture0);
+                mesh.ExecuteAnimation(deltaTime);
+                Matrix4x4 model = mesh.Transform.ViewMatrix;
                 pipeline.SetUniform("model", model);
-                Gl.DrawArrays(Primitive, 0, (uint)(cube.Vertices.Length/cube.Size));
+                Gl.DrawArrays(Primitive, 0, (uint)(mesh.Vertices.Length/mesh.Size));
             }
-        }
-
-        public Transform ExecuteAnimations(Transform transform, double deltaTime)
-        {
-            Transform result = transform;
-            foreach (var anim in Animations)
-            {
-                result = anim.Invoke(result, deltaTime);
-            }
-            return result;
         }
     }
 }

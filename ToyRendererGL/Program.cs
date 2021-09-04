@@ -63,12 +63,11 @@ namespace ToyRendererGL
             //Gl.DepthFunc(DepthFunction.Less);
 
             TexturedCube brickCube = new TexturedCube(Gl, DiffuseTexturePath);
+            brickCube.SetAnimations(Animations.RotationAnimation);
             TexturedCube snaulXCube = new TexturedCube(Gl, "snaulx.jpg");
             snaulXCube.Transform.Position = new Vector3(1, 3, 1);
-            RenderTask = new RenderTextured(Gl, brickCube, snaulXCube)
-            {
-                Animations = new Func<Transform, double, Transform>[] { Animations.ScaleAnimation, Animations.ScaleRotation }
-            };
+            snaulXCube.SetAnimations(Animations.ScaleAnimation);
+            RenderTask = new RenderTextured(Gl, brickCube, snaulXCube);
             RenderTask.Init();
 
             Camera = new Camera(Window.Size.X, Window.Size.Y);
