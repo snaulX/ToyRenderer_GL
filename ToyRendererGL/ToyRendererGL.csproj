@@ -34,11 +34,11 @@
     <None Update="Brick_Wall_008_SD\Brick_wall_008_SPEC.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="shader.frag">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="Shaders\default_shader.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="shader.vert">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="Shaders\default_shader.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="snaulx.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

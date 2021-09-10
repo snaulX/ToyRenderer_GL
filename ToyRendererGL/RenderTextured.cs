@@ -12,20 +12,18 @@ namespace ToyRendererGL
     public class RenderTextured : IRenderTask
     {
         private const PrimitiveType Primitive = PrimitiveType.Triangles;
-        private const string VertexShaderPath = "shader.vert";
-        private const string FragShaderPath = "shader.frag";
+        private const string VertexShaderPath = "Shaders\\default_shader.vert";
+        private const string FragShaderPath = "Shaders\\default_shader.frag";
 
         public GL Gl { get; set; }
 
         private Pipeline pipeline;
-        private TexturedMesh<float, uint>[] meshes;
 
         private readonly string vertCode, fragCode;
 
-        public RenderTextured(GL gl, params TexturedMesh<float, uint>[] meshes)
+        public RenderTextured(GL gl)
         {
             Gl = gl;
-            this.meshes = meshes;
 
             vertCode = File.ReadAllText(VertexShaderPath);
             fragCode = File.ReadAllText(FragShaderPath);
@@ -36,12 +34,13 @@ namespace ToyRendererGL
             pipeline = new Pipeline(Gl, vertCode, fragCode);
         }
 
-        public void Render(Camera cam, double deltaTime)
+        public void Render(Scene scene, double deltaTime)
         {
             pipeline.Use();
+            Camera cam = scene.Camera;
             pipeline.SetUniform("projection", cam.PerspectiveMatrix);
             pipeline.SetUniform("view", cam.ViewMatrix);
-            foreach (var mesh in meshes)
+            foreach (var mesh in scene.Meshes)
             {
                 mesh.VertexArray.Bind();
                 mesh.DiffuseTexture.Bind(TextureUnit.Texture0);

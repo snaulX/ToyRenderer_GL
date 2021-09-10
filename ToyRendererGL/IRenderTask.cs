@@ -8,6 +8,6 @@ namespace ToyRendererGL
     {
         GL Gl { get; set; }
         void Init();
-        void Render(Camera cam, double deltaTime);
+        void Render(Scene scene, double deltaTime);
     }
 }

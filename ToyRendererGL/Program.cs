@@ -19,7 +19,9 @@ namespace ToyRendererGL
         private static Input Input;
 
         private static RenderTextured RenderTask;
-        private static Camera Camera;
+        private static Scene Scene;
+
+        private static Camera Camera => Scene.Camera;
 
         static void Main(string[] args)
         {
@@ -44,7 +46,7 @@ namespace ToyRendererGL
         {
             Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            RenderTask.Render(Camera, deltaTime);
+            RenderTask.Render(Scene, deltaTime);
         }
 
         private static unsafe void OnLoad()
@@ -67,16 +69,16 @@ namespace ToyRendererGL
             TexturedCube snaulXCube = new TexturedCube(Gl, "snaulx.jpg");
             snaulXCube.Transform.Position = new Vector3(1, 3, 1);
             snaulXCube.SetAnimations(Animations.ScaleAnimation);
-            RenderTask = new RenderTextured(Gl, brickCube, snaulXCube);
+            Camera cam = new Camera(Window.Size.X, Window.Size.Y);
+            Window.Resize += (size) => cam.OnResized(size.X, size.Y);
+            cam.Position = new Vector3(0, 0, 3);
+            cam.LookTarget = brickCube.Transform.Position;
+            cam.Up = Vector3.UnitY;
+            cam.UpdateViewMatrix();
+            cam.UpdatePerspectiveMatrix();
+            Scene = new Scene(cam, brickCube, snaulXCube);
+            RenderTask = new RenderTextured(Gl);
             RenderTask.Init();
-
-            Camera = new Camera(Window.Size.X, Window.Size.Y);
-            Window.Resize += (size) => Camera.OnResized(size.X, size.Y);
-            Camera.Position = new Vector3(0, 0, 3);
-            Camera.LookTarget = brickCube.Transform.Position;
-            Camera.Up = Vector3.UnitY;
-            Camera.UpdateViewMatrix();
-            Camera.UpdatePerspectiveMatrix();
         }
 
         private static void KeyDown(IKeyboard keyboard, Key key, int arg3)
