@@ -18,10 +18,11 @@ namespace ToyRendererGL
         private static GL Gl;
         private static Input Input;
 
-        private static RenderTextured RenderTask;
+        private static IRenderTask RenderTask;
         private static Scene Scene;
 
         private static Camera Camera => Scene.Camera;
+        private static Light Light;
 
         static void Main(string[] args)
         {
@@ -77,7 +78,9 @@ namespace ToyRendererGL
             cam.UpdateViewMatrix();
             cam.UpdatePerspectiveMatrix();
             Scene = new Scene(cam, brickCube, snaulXCube);
-            RenderTask = new RenderTextured(Gl);
+            Light = new Light(Vector3.One, new Vector3(0.2f, 0.2f, 0.2f), new Vector3(0.5f, 0.5f, 0.5f), new Vector3(1.0f, 1.0f, 1.0f));
+            Scene.AddLight(Light);
+            RenderTask = new DiffuseLightTask(Gl);//new RenderTextured(Gl);
             RenderTask.Init();
         }
 

@@ -8,12 +8,13 @@ namespace ToyRendererGL
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
-        public Texture DiffuseTexture;
+        public Material Material;
 
         public Func<Transform, double, Transform>[] Animations { get; private set; } = Array.Empty<Func<Transform, double, Transform>>();
 
-        public TexturedMesh(GL gl) : base(gl)
+        public TexturedMesh(GL gl, string texturePath) : base(gl)
         {
+            Material = new Material(gl, texturePath, new System.Numerics.Vector3(0.5f, 0.5f, 0.5f), 64f);
         }
 
         public void ExecuteAnimation(double deltaTime)
@@ -22,11 +23,6 @@ namespace ToyRendererGL
             {
                 Transform = anim.Invoke(Transform, deltaTime);
             }
-        }
-
-        public void SetDiffuseTexture(string path)
-        {
-            DiffuseTexture = new Texture(Gl, path);
         }
 
         public void SetAnimations(params Func<Transform, double, Transform>[] animations)

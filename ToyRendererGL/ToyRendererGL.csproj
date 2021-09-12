@@ -40,6 +40,12 @@
     <None Update="Shaders\default_shader.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Shaders\diffuse_lighting.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\diffuse_lighting.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="snaulx.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
