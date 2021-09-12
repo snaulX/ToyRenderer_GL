@@ -65,11 +65,14 @@ namespace ToyRendererGL
             //Gl.DepthMask(false);
             //Gl.DepthFunc(DepthFunction.Less);
 
-            TexturedCube brickCube = new TexturedCube(Gl, DiffuseTexturePath);
+            TexturedCube brickCube = new TexturedCube(Gl, DiffuseTexturePath, SpecularTexturePath);
             brickCube.SetAnimations(Animations.RotationAnimation);
-            TexturedCube snaulXCube = new TexturedCube(Gl, "snaulx.jpg");
-            snaulXCube.Transform.Position = new Vector3(1, 3, 1);
-            snaulXCube.SetAnimations(Animations.ScaleAnimation);
+            TexturedCube container = new TexturedCube(Gl, "Container\\container2.png", "Container\\container2_specular.png");
+            container.Transform.Position = new Vector3(1, 3, 1);
+            container.SetAnimations(Animations.ScaleAnimation);
+            //TexturedCube snaulXCube = new TexturedCube(Gl, "snaulx.jpg");
+            //snaulXCube.Transform.Position = new Vector3(1, 3, 1);
+            //snaulXCube.SetAnimations(Animations.ScaleAnimation);
             Camera cam = new Camera(Window.Size.X, Window.Size.Y);
             Window.Resize += (size) => cam.OnResized(size.X, size.Y);
             cam.Position = new Vector3(0, 0, 3);
@@ -77,8 +80,11 @@ namespace ToyRendererGL
             cam.Up = Vector3.UnitY;
             cam.UpdateViewMatrix();
             cam.UpdatePerspectiveMatrix();
-            Scene = new Scene(cam, brickCube, snaulXCube);
-            Light = new Light(Vector3.One, new Vector3(0.2f, 0.2f, 0.2f), new Vector3(0.5f, 0.5f, 0.5f), new Vector3(1.0f, 1.0f, 1.0f));
+            Scene = new Scene(cam, brickCube, container);//, snaulXCube);
+            Light = new Light(position: Vector3.One, 
+                ambient: new Vector3(0.2f, 0.2f, 0.2f),
+                diffuse: new Vector3(0.8f, 0.8f, 0.8f), 
+                specular: new Vector3(1.0f, 1.0f, 1.0f));
             Scene.AddLight(Light);
             RenderTask = new DiffuseLightTask(Gl);//new RenderTextured(Gl);
             RenderTask.Init();

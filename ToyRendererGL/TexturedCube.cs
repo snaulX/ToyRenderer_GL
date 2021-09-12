@@ -63,7 +63,7 @@ namespace ToyRendererGL
 
         public override uint Size => 8; // 3 + 3 + 2;
 
-        public TexturedCube(GL gl, string texturePath) : base(gl, texturePath)
+        public TexturedCube(GL gl, string texturePath, string specularPath) : base(gl, texturePath, specularPath)
         {
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // position
             VertexArray.SetVertexAttrib(VertexAttribPointerType.Float, 3); // normals

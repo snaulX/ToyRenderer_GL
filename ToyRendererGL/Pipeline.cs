@@ -51,6 +51,7 @@ namespace ToyRendererGL
         public void Use() => gl.UseProgram(code);
 
         #region Unifroms
+        public void SetUniform(string name, bool value) => gl.Uniform1(GetLocation(name), value ? 1 : 0);
         public void SetUniform(string name, float value) => gl.Uniform1(GetLocation(name), value);
         public void SetUniform(string name, int value) => gl.Uniform1(GetLocation(name), value);
         public void SetUniform(string name, double value) => gl.Uniform1(GetLocation(name), value);

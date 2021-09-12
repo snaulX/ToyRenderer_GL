@@ -46,7 +46,7 @@ namespace ToyRendererGL
             {
                 mesh.VertexArray.Bind();
                 mesh.Material.DiffuseTexture.Bind(TextureUnit.Texture0);
-                pipeline.SetUniform("material.specular", mesh.Material.Specular);
+                mesh.Material.SpecularTexture.Bind(TextureUnit.Texture1);
                 pipeline.SetUniform("material.shininess", mesh.Material.Shiness);
                 mesh.ExecuteAnimation(deltaTime);
                 Matrix4x4 model = mesh.Transform.ViewMatrix;
