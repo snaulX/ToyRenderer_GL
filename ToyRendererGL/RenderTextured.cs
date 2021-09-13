@@ -47,7 +47,7 @@ namespace ToyRendererGL
                 mesh.ExecuteAnimation(deltaTime);
                 Matrix4x4 model = mesh.Transform.ViewMatrix;
                 pipeline.SetUniform("model", model);
-                Gl.DrawArrays(Primitive, 0, (uint)(mesh.Vertices.Length/mesh.Size));
+                Gl.DrawArrays(Primitive, 0, mesh.Count);
             }
         }
     }

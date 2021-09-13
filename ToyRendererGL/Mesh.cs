@@ -13,6 +13,8 @@ namespace ToyRendererGL
     {
         public readonly GL Gl;
 
+        public readonly uint Count;
+
         public abstract TVertex[] Vertices { get; }
         public abstract TIndex[] Indices { get; }
         public abstract uint Size { get; }
@@ -25,6 +27,8 @@ namespace ToyRendererGL
         public Mesh(GL gl)
         {
             Gl = gl;
+
+            Count = (uint)(Vertices.Length / Size);
 
             VertexBuffer = new Buffer<TVertex>(Gl, Vertices, BufferTargetARB.ArrayBuffer);
             IndexBuffer = new Buffer<TIndex>(Gl, Indices, BufferTargetARB.ElementArrayBuffer);

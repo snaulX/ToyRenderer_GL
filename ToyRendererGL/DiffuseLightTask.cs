@@ -35,13 +35,44 @@ namespace ToyRendererGL
         {
             pipeline.Use();
             Camera cam = scene.Camera;
-            Light light = scene.Lights[0];
             pipeline.SetUniform("projection", cam.PerspectiveMatrix);
             pipeline.SetUniform("view", cam.ViewMatrix);
-            pipeline.SetUniform("light.position", light.Position);
-            pipeline.SetUniform("light.ambient", light.Ambient);
-            pipeline.SetUniform("light.diffuse", light.Diffuse);
-            pipeline.SetUniform("light.specular", light.Specular);
+            pipeline.SetUniform("dirLightsCount", scene.DirectionLights.Length);
+            for (int i = 0; i < scene.DirectionLights.Length; i++)
+            {
+                DirectionLight dirLight = scene.DirectionLights[i];
+                pipeline.SetUniform($"dirLights[{i}].direction", dirLight.Direction);
+                pipeline.SetUniform($"dirLights[{i}].ambient", dirLight.Ambient);
+                pipeline.SetUniform($"dirLights[{i}].diffuse", dirLight.Diffuse);
+                pipeline.SetUniform($"dirLights[{i}].specular", dirLight.Specular);
+            }
+            pipeline.SetUniform("pointLightsCount", scene.PointLights.Length);
+            for (int i = 0; i < scene.PointLights.Length; i++)
+            {
+                PointLight pointLight = scene.PointLights[i];
+                pipeline.SetUniform($"pointLights[{i}].position", pointLight.Position);
+                pipeline.SetUniform($"pointLights[{i}].ambient", pointLight.Ambient);
+                pipeline.SetUniform($"pointLights[{i}].diffuse", pointLight.Diffuse);
+                pipeline.SetUniform($"pointLights[{i}].specular", pointLight.Specular);
+                pipeline.SetUniform($"pointLights[{i}].constant", pointLight.Constant);
+                pipeline.SetUniform($"pointLights[{i}].linear", pointLight.Linear);
+                pipeline.SetUniform($"pointLights[{i}].quadratic", pointLight.Quadratic);
+            }
+            pipeline.SetUniform("spotLightsCount", scene.SpotLights.Length);
+            for (int i = 0; i < scene.SpotLights.Length; i++)
+            {
+                SpotLight spotLight = scene.SpotLights[i];
+                pipeline.SetUniform($"spotLights[{i}].position", spotLight.Position);
+                pipeline.SetUniform($"spotLights[{i}].direction", spotLight.Direction);
+                pipeline.SetUniform($"spotLights[{i}].ambient", spotLight.Ambient);
+                pipeline.SetUniform($"spotLights[{i}].diffuse", spotLight.Diffuse);
+                pipeline.SetUniform($"spotLights[{i}].specular", spotLight.Specular);
+                pipeline.SetUniform($"spotLights[{i}].constant", spotLight.Constant);
+                pipeline.SetUniform($"spotLights[{i}].linear", spotLight.Linear);
+                pipeline.SetUniform($"spotLights[{i}].quadratic", spotLight.Quadratic);
+                pipeline.SetUniform($"spotLights[{i}].cutOff", spotLight.CutOff);
+                pipeline.SetUniform($"spotLights[{i}].outerCutOff", spotLight.OuterCutOff);
+            }
             foreach (var mesh in scene.Meshes)
             {
                 mesh.VertexArray.Bind();
@@ -51,7 +82,7 @@ namespace ToyRendererGL
                 mesh.ExecuteAnimation(deltaTime);
                 Matrix4x4 model = mesh.Transform.ViewMatrix;
                 pipeline.SetUniform("model", model);
-                Gl.DrawArrays(Primitive, 0, (uint)(mesh.Vertices.Length / mesh.Size));
+                Gl.DrawArrays(Primitive, 0, mesh.Count);
             }
         }
     }

@@ -22,7 +22,7 @@ namespace ToyRendererGL
         private static Scene Scene;
 
         private static Camera Camera => Scene.Camera;
-        private static Light Light;
+        private static SpotLight Flashlight;
 
         static void Main(string[] args)
         {
@@ -81,11 +81,27 @@ namespace ToyRendererGL
             cam.UpdateViewMatrix();
             cam.UpdatePerspectiveMatrix();
             Scene = new Scene(cam, brickCube, container);//, snaulXCube);
-            Light = new Light(position: Vector3.One, 
+            DirectionLight dirLight = new DirectionLight(
+                direction: new Vector3(-0.2f, -1.0f, -0.3f),
+                ambient: new Vector3(0.05f, 0.05f, 0.05f),
+                diffuse: new Vector3(0.4f, 0.4f, 0.4f),
+                specular: new Vector3(0.5f, 0.5f, 0.5f));
+            Scene.AddLight(dirLight);
+            PointLight light = new PointLight(
+                position: Vector3.One,
                 ambient: new Vector3(0.2f, 0.2f, 0.2f),
-                diffuse: new Vector3(0.8f, 0.8f, 0.8f), 
+                diffuse: new Vector3(0.8f, 0.8f, 0.8f),
                 specular: new Vector3(1.0f, 1.0f, 1.0f));
-            Scene.AddLight(Light);
+            Scene.AddLight(light);
+            Flashlight = new SpotLight(
+                position: Camera.Position,
+                direction: Camera.LookDirection,
+                ambient: Vector3.Zero,
+                diffuse: Vector3.One,
+                specular: Vector3.One,
+                cutOffDegrees: 12.5f,
+                outerCutOffDegrees: 15.0f);
+            Scene.AddLight(Flashlight);
             RenderTask = new DiffuseLightTask(Gl);//new RenderTextured(Gl);
             RenderTask.Init();
         }
@@ -98,10 +114,12 @@ namespace ToyRendererGL
             if (key == Key.W)
             {
                 Camera.Position -= Vector3.UnitZ;
+                //Flashlight.Position -= Vector3.UnitZ;
             }
             else if (key == Key.S)
             {
                 Camera.Position += Vector3.UnitZ;
+                //Flashlight.Position += Vector3.UnitZ;
             }
             else if (key == Key.A)
             {
