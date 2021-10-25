@@ -60,6 +60,7 @@ namespace ToyRendererGL
         public void SetUniform(string name, Vector3 value) => gl.Uniform3(GetLocation(name), value);
         public void SetUniform(string name, float x, float y, float z) => gl.Uniform3(GetLocation(name), x, y, z);
         public void SetUniform(string name, Vector4 value) => gl.Uniform4(GetLocation(name), value);
+        public void SetUniform(string name, System.Drawing.Color value) => gl.Uniform4(GetLocation(name), value.R, value.G, value.B, value.A);
         public void SetUniform(string name, Quaternion value) => gl.Uniform4(GetLocation(name), value);
         public void SetUniform(string name, float x, float y, float z, float w) => gl.Uniform4(GetLocation(name), x, y, z, w);
         public unsafe void SetUniform(string name, Matrix4x4 matrix)

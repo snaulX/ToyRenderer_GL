@@ -2,17 +2,16 @@
 using System;
 #endif
 using System.Numerics;
-using System.IO;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Input;
 
 namespace ToyRendererGL
 {
-    static class Program
+    static class ColorShaderProgram
     {
-        private const string DiffuseTexturePath = "Brick_Wall_008_SD\\Brick_wall_008_COLOR.jpg";
-        private const string SpecularTexturePath = "Brick_Wall_008_SD\\Brick_wall_008_SPEC.jpg";
+        private const string DiffuseTexturePath = "Container\\container2.png";
+        private const string SpecularTexturePath = "Container\\container_color.png";
 
         private static IWindow Window;
         private static GL Gl;
@@ -22,7 +21,6 @@ namespace ToyRendererGL
         private static Scene Scene;
 
         private static Camera Camera => Scene.Camera;
-        private static SpotLight Flashlight;
 
         static void Main(string[] args)
         {
@@ -65,15 +63,12 @@ namespace ToyRendererGL
             //Gl.DepthMask(false);
             //Gl.DepthFunc(DepthFunction.Less);
 
-            TexturedCube brickCube = new TexturedCube(Gl, DiffuseTexturePath, SpecularTexturePath);
-            brickCube.SetAnimations(Animations.RotationAnimation);
-            TexturedCube container = new TexturedCube(Gl, "Container\\container2.png", "Container\\container2_specular.png");
-            container.Transform.Position = new Vector3(1, 3, 1);
-            container.SetAnimations(Animations.ScaleAnimation);
+            TexturedCube cube = new TexturedCube(Gl, DiffuseTexturePath, SpecularTexturePath);
+            cube.SetAnimations(Animations.RotationAnimation);
             Camera cam = new Camera(Window.Size.X, Window.Size.Y);
             Window.Resize += (size) => cam.OnResized(size.X, size.Y);
             cam.Position = new Vector3(0, 0, 3);
-            cam.LookTarget = brickCube.Transform.Position;
+            cam.LookTarget = cube.Transform.Position;
             cam.Up = Vector3.UnitY;
             cam.UpdateViewMatrix();
             cam.UpdatePerspectiveMatrix();
@@ -85,11 +80,7 @@ namespace ToyRendererGL
                 diffuse: new Vector3(0.8f, 0.8f, 0.8f),
                 specular: new Vector3(1.0f, 1.0f, 1.0f));
 
-            TexturedCube snaulXCube = new TexturedCube(Gl, "snaulx.jpg", "snaulx.jpg");
-            snaulXCube.Transform.Position = light.Position;
-            snaulXCube.Transform.Scale = new Vector3(0.2f);
-            //snaulXCube.SetAnimations(Animations.ScaleAnimation);
-            Scene = new Scene(cam, brickCube, container, snaulXCube);
+            Scene = new Scene(cam, cube);
             DirectionLight dirLight = new DirectionLight(
                 direction: new Vector3(-0.2f, -1.0f, -0.3f),
                 ambient: new Vector3(0.35f, 0.35f, 0.35f),
@@ -97,16 +88,7 @@ namespace ToyRendererGL
                 specular: new Vector3(0.5f, 0.5f, 0.5f));
             Scene.AddLight(dirLight);
             Scene.AddLight(light);
-            Flashlight = new SpotLight(
-                position: Camera.Position,
-                direction: Camera.LookDirection,
-                ambient: new Vector3(0.3f, 0.3f, 0.3f)/*Vector3.Zero*/,
-                diffuse: new Vector3(0.8f, 0.8f, 0.8f)/*Vector3.One*/,
-                specular: new Vector3(0.5f, 0.5f, 0.5f)/*Vector3.One*/,
-                cutOffDegrees: 12.5f,
-                outerCutOffDegrees: 15.0f);
-            Scene.AddLight(Flashlight);
-            RenderTask = new DiffuseLightTask(Gl);//new RenderTextured(Gl);
+            RenderTask = new ColorShadingTask(Gl);
             RenderTask.Init();
         }
 
